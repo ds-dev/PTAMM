@@ -27,6 +27,7 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #ifdef WIN32
 #include "direct.h"

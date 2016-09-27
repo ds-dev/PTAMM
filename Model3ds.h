@@ -10,7 +10,7 @@
 #ifndef MODEL3DS_H
 #define MODEL3DS_H
 
-#include <lib3ds.h>
+#include <lib3ds/file.h>
 #include <string>
 
 #include "OpenGL.h"

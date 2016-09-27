@@ -8,6 +8,11 @@
 #include <cvd/gl_helpers.h>
 #include <gvars3/instances.h>
 
+#include <lib3ds/file.h>
+#include <lib3ds/mesh.h>
+#include <lib3ds/vector.h>
+#include <lib3ds/material.h>
+
 #include <iostream>
 
 namespace PTAMM {
@@ -57,7 +62,7 @@ bool Model3DS::_Load()
 
   // attempt to load the model file
   std::string sFullPath = msModelDir + "/" + msModelFile;
-  Lib3dsFile * pModel = lib3ds_file_open( sFullPath.c_str() );
+  Lib3dsFile * pModel = lib3ds_file_load( sFullPath.c_str() );
 
   if( pModel == NULL ) {
     cout << "Failed to load model " << sFullPath << endl;
@@ -188,13 +193,21 @@ GLuint Model3DS::_GenerateDisplayList( Lib3dsFile * pModel, bool bWireframe )
     glNewList( list , GL_COMPILE);
 
     // Loop through every mesh
-    for(int mm = 0; mm < pModel->nmeshes; mm++ )
+    Lib3dsMesh* mesh;
+//    for(int mm = 0; mm < pModel->nmeshes; mm++ )
+    for(mesh = pModel->meshes; mesh != NULL; mesh = mesh->next)
     {
-      Lib3dsMesh * mesh = pModel->meshes[mm];
-      Vector3D * normals = new Vector3D[ 3* mesh->nfaces];
+//      Lib3dsMesh * mesh = pModel->meshes[mm];
+//      Vector3D * normals = new Vector3D[ 3* mesh->nfaces];
 
       //calculate the normals
-      lib3ds_mesh_calculate_vertex_normals( mesh, normals );
+//      lib3ds_mesh_calculate_vertex_normals( mesh, normals );
+
+		Lib3dsVector* normals = (Lib3dsVector*) malloc(3 * sizeof(Lib3dsVector) * mesh->faces);
+
+		lib3ds_mesh_calculate_normals(mesh, normals);
+
+
 
       glDisable(GL_TEXTURE_2D);
       glDisable(GL_BLEND);
@@ -203,15 +216,18 @@ GLuint Model3DS::_GenerateDisplayList( Lib3dsFile * pModel, bool bWireframe )
       bWireframe ? glBegin( GL_LINES ) : glBegin( GL_TRIANGLES );
 
       // Go through all of the faces (polygons) of the object and draw them
-      for( int ff = 0; ff < mesh->nfaces; ff++ )
+//      for( int ff = 0; ff < mesh->nfaces; ff++ )
+      for( Lib3dsDword ff = 0; ff < mesh->faces; ff++ )
       {
-        Lib3dsFace & face = mesh->faces[ff];
+        Lib3dsFace & face = mesh->faceL[ff];
 
         glColor3ub(255, 255, 255);
 
-        if( face.material >= 0 )
+//        if( face.material >= 0 )
+        if( face.material[0] )
         {
-          Lib3dsMaterial * material = pModel->materials[ face.material ];
+//          Lib3dsMaterial* material = pModel->materials[ face.material ];
+        	Lib3dsMaterial* material=lib3ds_file_material_by_name(pModel, face.material);
 
           glMaterialfv(GL_FRONT, GL_AMBIENT, material->ambient);
           glMaterialfv(GL_FRONT, GL_DIFFUSE, material->diffuse);
@@ -233,17 +249,19 @@ GLuint Model3DS::_GenerateDisplayList( Lib3dsFile * pModel, bool bWireframe )
         }
 
         // Go through each corner of the triangle and draw it.
-        for( int vv = 0; vv < 3; vv++ )
+//        for( int vv = 0; vv < 3; vv++ )
+        for (int i=0; i<3; ++i)
         {
           // Get the index for each point of the face
-          int index = face.index[vv];
+//          int index = face.index[vv];
 
           // Give OpenGL the normal for this vertex.
-          Vector3D & v3Norm = normals[ 3*ff + vv ];
+          Vector3D & v3Norm = normals[ 3*ff + i ];
           glNormal3fv( v3Norm );
 
           // Draw in the current vertex of the object (Corner of current face)
-          glVertex3fv( mesh->vertices[ index ] );
+//          glVertex3fv( mesh->vertices[ index ] );
+          glVertex3fv(mesh->pointL[face.points[i]].pos);
         }
       }
 
@@ -652,13 +670,13 @@ void Model3DS::_LoadTextures( Lib3dsFile * pModel )
 {
   assert( pModel );
 
-  for( int ii = 0; ii < pModel->nmaterials; ++ii)
-  {
-    string sTexFile = pModel->materials[ii]->texture1_map.name;
-    if( !sTexFile.empty() ) {
-      ///@TODO Load the textures
-    }
-  }
+//  for( int ii = 0; ii < pModel->nmaterials; ++ii)
+//  {
+//    string sTexFile = pModel->materials[ii]->texture1_map.name;
+//    if( !sTexFile.empty() ) {
+//      ///@TODO Load the textures
+//    }
+//  }
 
 }
 

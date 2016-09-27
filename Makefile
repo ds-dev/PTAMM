@@ -15,12 +15,11 @@ EXTRA_CFLAGS:= -DENABLE_MODELS_GAME
 # Edit the lines below to point to any needed include and link paths
 # Or to change the compiler's optimization flags
 CC = g++
-COMPILEFLAGS = -I MY_CUSTOM_INCLUDE_PATH -D_LINUX -D_REENTRANT -Wall  -O3 -march=nocona -msse3 -fno-strict-aliasing -I/usr/include/opencv-2.3.1 
-#LINKFLAGS = -L MY_CUSTOM_LINK_PATH -lGVars3 -lcvd $(3DSLIB)
-LINKFLAGS = -lblas -llapack -L MY_CUSTOM_LINK_PATH -lGVars3 -lcvd $(3DSLIB) -L/usr/local/lib -lopencv_legacy -lopencv_core -lopencv_video -lopencv_highgui
+COMPILEFLAGS = -I MY_CUSTOM_INCLUDE_PATH -D_LINUX -D_REENTRANT -Wall  -O3 -march=nocona -msse3 -fno-strict-aliasing
+LINKFLAGS = -L MY_CUSTOM_LINK_PATH -lGVars3 -lcvd $(3DSLIB)
+
 # Edit this line to change video source
-# VIDEOSOURCE = VideoSource_Linux_DV.o
-VIDEOSOURCE = VideoSource_Linux_OpenCV.o
+VIDEOSOURCE = VideoSource_Linux_V4L.o
 
 OBJECTS=	main.o\
 		GLWindow2.o\
